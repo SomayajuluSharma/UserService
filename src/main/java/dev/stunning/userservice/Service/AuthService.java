@@ -85,16 +85,19 @@ public class AuthService {
         return UserDto.from(savedUser);
     }
 
-    public SessionStatus validate(String token, Long userId){
+    public Optional<UserDto> validate(String token, Long userId){
         Optional<Session> sessionOptional = sessionRepository.findByTokenAndUser_Id(token, userId);
 
         if(sessionOptional.isEmpty()){
-            return SessionStatus.INVALID;
+            return Optional.empty();
         }
         Session session = sessionOptional.get();
         if(!session.getSessionStatus().equals(SessionStatus.ACTIVE)){
-            return SessionStatus.EXPIRED;
+            return Optional.empty();
         }
-        return SessionStatus.ACTIVE;
+
+        User user = userRepository.findById(userId).get();
+        UserDto userDto = UserDto.from(user);
+        return Optional.of(userDto);
     }
 }
